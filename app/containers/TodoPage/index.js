@@ -1,8 +1,37 @@
-import { AppBar, TextField, Toolbar, Typography } from '@material-ui/core';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import TodoItem from './TodoItem';
+import React, { useEffect, useState } from "react";
+import {
+  AppBar,
+  CircularProgress,
+  TextField,
+  Toolbar,
+  Typography,
+} from "@material-ui/core";
+import styled from "styled-components";
+import saga from "./saga";
+import reducer from "./reducer";
+import { connect } from "react-redux";
+import {
+  makeSelectLoading,
+  makeSelectTodoList,
+  makeSelectError,
+  makeSelectDeleteLoading,
+  makeSelectAddLoading,
+  makeSelectAddError,
+  makeSelectDeleteError,
+  makeSelectCompleteLoading,
+  makeSelectCompleteError,
+} from "./selectors";
+import TodoItem from "./TodoItem";
+import { createStructuredSelector } from "reselect";
+import {
+  addTodoRequest,
+  completeTodoRequest,
+  deleteTodoRequest,
+  loadTodosRequest,
+} from "./actions";
+import PropTypes from "prop-types";
+import { useInjectReducer } from "utils/injectReducer";
+import { useInjectSaga } from "utils/injectSaga";
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -10,7 +39,6 @@ const Wrapper = styled.div`
 `;
 const App = styled.div`
   width: auto;
-
   text-align: center;
   background-color: #f5f5f5;
   .toolbar {
@@ -18,53 +46,141 @@ const App = styled.div`
     padding: 24px 0;
     justify-content: center;
   }
-  .textField {
+  .form {
     margin: 24px 0;
+    & > div {
+      margin-left: 16px;
+    }
+  }
+  .circularProgress {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 24px;
+  }
+  .error {
+    margin: 16px 0;
   }
 `;
 
-const TodoPage = () => {
-  const [todoList, setTodoList] = useState([]);
+const key = "todos";
+const TodoPage = ({
+  loading,
+  todoList,
+  error,
+  fetchTodos,
+  fetchDelete,
+  fetchAdd,
+  deleteLoading,
+  addLoading,
+  addError,
+  deleteError,
+  completeLoading,
+  completeError,
+  fetchComplete,
+}) => {
+  // ??????????????????????????????????????????????????????????????????????????????????????
+  useInjectReducer({ key, reducer });
+  useInjectSaga({ key, saga });
+  const [value, setValue] = useState("");
+
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axios.get(
-        `https://api-nodejs-todolist.herokuapp.com/task`,
-        {
-          headers: {
-            Authorization:
-              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1Zjc2ZTQzN2E2YTY3MzAwMTc0NzFjNmIiLCJpYXQiOjE2MDE2MjcxOTJ9.x6hiHZB6izKaoLB5RRKKeqX-J5TlqtFJMDu2NVtl5ak',
-          },
-        },
-      );
-      setTodoList(response.data.data);
-    };
-    fetchData();
+    fetchTodos();
   }, []);
-  console.log(todoList);
+
+  const handleChange = (event) => {
+    setValue(event.target.value);
+  };
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    fetchAdd(value);
+    setValue("");
+  };
   return (
     <Wrapper>
       <App>
         <AppBar position="static" variant="elevation">
           <Toolbar className="toolbar">
-            <Typography variant="h5">React Todo List (x)</Typography>
+            <Typography variant="h5">
+              React Todo List ({todoList.length})
+            </Typography>
           </Toolbar>
         </AppBar>
-        <TextField
-          className="textField"
-          variant="outlined"
-          placeholder="Add Task"
-          size="small"
-        />
-        {todoList.length > 0 &&
-          todoList.map(todo => (
+        <form className="form" onSubmit={handleSubmit}>
+          <TextField
+            variant="outlined"
+            placeholder="Add Task"
+            size="small"
+            value={value}
+            onChange={handleChange}
+          />
+          {addLoading && <CircularProgress />}
+        </form>
+        {loading ? (
+          <div className="circularProgress">
+            <CircularProgress />
+          </div>
+        ) : (
+          todoList.map((todo) => (
             <TodoItem
-              isComplete={todo.complete}
+              key={todo._id}
+              _id={todo._id}
+              completed={todo.completed}
               description={todo.description}
+              handleDelete={fetchDelete}
+              deleteLoading={deleteLoading}
+              handleComplete={fetchComplete}
+              completeLoading={completeLoading}
             />
-          ))}
+          ))
+        )}
+        {(error || addError || deleteError || completeError) && (
+          <Typography className="error" color="error">
+            An error occurred, please try again later.
+          </Typography>
+        )}
       </App>
     </Wrapper>
   );
 };
 
-export default TodoPage;
+TodoPage.propTypes = {
+  todoList: PropTypes.array,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  fetchTodos: PropTypes.func,
+  fetchAdd: PropTypes.func,
+  fetchDelete: PropTypes.func,
+  fetchComplete: PropTypes.func,
+  addLoading: PropTypes.bool,
+  addError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  deleteLoading: PropTypes.string,
+  deleteError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  completeLoading: PropTypes.string,
+  completeError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+};
+
+const mapStateToProps = createStructuredSelector({
+  todoList: makeSelectTodoList(),
+  loading: makeSelectLoading(),
+  error: makeSelectError(),
+  addLoading: makeSelectAddLoading(),
+  addError: makeSelectAddError(),
+  deleteLoading: makeSelectDeleteLoading(),
+  deleteError: makeSelectDeleteError(),
+  completeLoading: makeSelectCompleteLoading(),
+  completeError: makeSelectCompleteError(),
+});
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    fetchTodos: () => dispatch(loadTodosRequest()),
+    fetchAdd: (todo) => dispatch(addTodoRequest(todo)),
+    fetchDelete: (_id) => dispatch(deleteTodoRequest(_id)),
+    fetchComplete: (_id) => dispatch(completeTodoRequest(_id)),
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TodoPage);
