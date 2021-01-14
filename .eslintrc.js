@@ -23,7 +23,7 @@ module.exports = {
     },
   },
   rules: {
-    'prettier/prettier': ['error', { ...prettierOptions, endOfLine: 'auto' }],
+    'prettier/prettier': ['error', prettierOptions],
     'arrow-body-style': [2, 'as-needed'],
     'class-methods-use-this': 0,
     'import/imports-first': 0,
@@ -34,6 +34,9 @@ module.exports = {
     'import/no-unresolved': 2,
     'import/no-webpack-loader-syntax': 0,
     'import/prefer-default-export': 0,
+    // tu them
+    'no-underscore-dangle': 'off',
+    //
     indent: [
       2,
       2,

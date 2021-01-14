@@ -1,4 +1,4 @@
-import produce from "immer";
+import produce from 'immer';
 import {
   LOAD_TODOS_REQUEST,
   LOAD_TODOS_SUCCESS,
@@ -12,10 +12,12 @@ import {
   COMPLETE_TODO_REQUEST,
   COMPLETE_TODO_SUCCESS,
   COMPLETE_TODO_ERROR,
-  EDIT_TODO_ERROR,
+  SELECT_TODO,
+  UNSELECT_TODO,
   EDIT_TODO_REQUEST,
+  EDIT_TODO_ERROR,
   EDIT_TODO_SUCCESS,
-} from "./constants";
+} from './constants';
 
 export const initialState = {
   todoList: [],
@@ -27,14 +29,18 @@ export const initialState = {
   deleteError: false,
   completeLoading: null,
   completeError: false,
+  // is Editing
+  editingTodo: null,
+  //
   editLoading: null,
   editError: false,
 };
 
+/* eslint-disable default-case, no-param-reassign */
 const todosReducer = (state = initialState, action) =>
-  produce(state, (draft) => {
+  produce(state, draft => {
     switch (action.type) {
-      // TODO LIST
+      // FETCH TODO LIST
       case LOAD_TODOS_REQUEST:
         draft.loading = true;
         draft.error = false;
@@ -65,14 +71,12 @@ const todosReducer = (state = initialState, action) =>
 
       // DELETE TODO
       case DELETE_TODO_REQUEST:
-        draft.deleteLoading = action._id;
+        draft.deleteLoading = action.id;
         draft.deleteError = false;
         break;
       case DELETE_TODO_SUCCESS: {
         draft.deleteLoading = null;
-        const index = draft.todoList.findIndex(
-          (todo) => todo._id === action._id
-        );
+        const index = draft.todoList.findIndex(todo => todo._id === action.id);
         if (index !== -1) draft.todoList.splice(index, 1);
         break;
       }
@@ -83,28 +87,43 @@ const todosReducer = (state = initialState, action) =>
 
       // COMPLETE TODO
       case COMPLETE_TODO_REQUEST:
-        draft.completeLoading = action._id;
+        draft.completeLoading = action.id;
         draft.completeError = false;
         break;
       case COMPLETE_TODO_SUCCESS: {
         draft.completeLoading = null;
-        const index = draft.todoList.findIndex(
-          (todo) => todo._id === action._id
-        );
+        const index = draft.todoList.findIndex(todo => todo._id === action.id);
         if (index !== -1)
           draft.todoList[index].completed = !draft.todoList[index].completed;
         break;
       }
+      case COMPLETE_TODO_ERROR:
+        draft.completeError = action.completeError;
+        draft.completeLoading = null;
+        break;
+
+      // SELECT UNSELECT TODO
+      case SELECT_TODO:
+        draft.editingTodo = action.id;
+        break;
+      case UNSELECT_TODO:
+        draft.editingTodo = null;
+        break;
 
       // EDIT TODO
       case EDIT_TODO_REQUEST:
-        draft.editLoading = action._id;
+        // action.todo ???
+        draft.editLoading = action.id;
         draft.editError = false;
         break;
-      case EDIT_TODO_SUCCESS:
-        draft.editLoading = action._id;
-        draft.editError = false;
+      case EDIT_TODO_SUCCESS: {
+        draft.editLoading = null;
+        const index = draft.todoList.findIndex(todo => todo._id === action.id);
+        if (index !== -1) draft.todoList[index].description = action.todo;
+        // unselectTodo after edit success
+        draft.editingTodo = null;
         break;
+      }
       case EDIT_TODO_ERROR:
         draft.editError = action.editError;
         draft.editLoading = null;

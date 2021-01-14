@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   AppBar,
   CircularProgress,
   TextField,
   Toolbar,
   Typography,
-} from "@material-ui/core";
-import styled from "styled-components";
-import saga from "./saga";
-import reducer from "./reducer";
-import { connect } from "react-redux";
+} from '@material-ui/core';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { useInjectReducer } from 'utils/injectReducer';
+import { useInjectSaga } from 'utils/injectSaga';
+import { createStructuredSelector } from 'reselect';
+import PropTypes from 'prop-types';
+import saga from './saga';
+import reducer from './reducer';
 import {
   makeSelectLoading,
   makeSelectTodoList,
@@ -20,18 +24,20 @@ import {
   makeSelectDeleteError,
   makeSelectCompleteLoading,
   makeSelectCompleteError,
-} from "./selectors";
-import TodoItem from "./TodoItem";
-import { createStructuredSelector } from "reselect";
+  makeSelectEditingTodo,
+  makeSelectEditLoading,
+} from './selectors';
+import TodoItem from './TodoItem';
 import {
   addTodoRequest,
   completeTodoRequest,
   deleteTodoRequest,
+  editTodoRequest,
   loadTodosRequest,
-} from "./actions";
-import PropTypes from "prop-types";
-import { useInjectReducer } from "utils/injectReducer";
-import { useInjectSaga } from "utils/injectSaga";
+  selectTodo,
+  unselectTodo,
+} from './actions';
+
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -62,7 +68,7 @@ const App = styled.div`
   }
 `;
 
-const key = "todos";
+const key = 'todos';
 const TodoPage = ({
   loading,
   todoList,
@@ -77,24 +83,30 @@ const TodoPage = ({
   completeLoading,
   completeError,
   fetchComplete,
+  fetchSelect,
+  fetchUnselect,
+  editingTodo,
+  fetchEdit,
+  editLoading,
 }) => {
   // ??????????????????????????????????????????????????????????????????????????????????????
   useInjectReducer({ key, reducer });
   useInjectSaga({ key, saga });
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
-  const handleChange = (event) => {
+  const handleChange = event => {
     setValue(event.target.value);
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = event => {
     event.preventDefault();
     fetchAdd(value);
-    setValue("");
+    setValue('');
   };
+
   return (
     <Wrapper>
       <App>
@@ -120,16 +132,22 @@ const TodoPage = ({
             <CircularProgress />
           </div>
         ) : (
-          todoList.map((todo) => (
+          todoList.map(todo => (
             <TodoItem
               key={todo._id}
-              _id={todo._id}
+              id={todo._id}
               completed={todo.completed}
               description={todo.description}
               handleDelete={fetchDelete}
               deleteLoading={deleteLoading}
               handleComplete={fetchComplete}
               completeLoading={completeLoading}
+              // handleSelect => toggle
+              handleSelect={fetchSelect}
+              handleUnselect={fetchUnselect}
+              editingTodo={editingTodo}
+              handleEdit={fetchEdit}
+              editLoading={editLoading}
             />
           ))
         )}
@@ -151,12 +169,17 @@ TodoPage.propTypes = {
   fetchAdd: PropTypes.func,
   fetchDelete: PropTypes.func,
   fetchComplete: PropTypes.func,
+  fetchSelect: PropTypes.func,
+  fetchUnselect: PropTypes.func,
+  fetchEdit: PropTypes.func,
   addLoading: PropTypes.bool,
   addError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
   deleteLoading: PropTypes.string,
   deleteError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
   completeLoading: PropTypes.string,
   completeError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  editingTodo: PropTypes.string,
+  editLoading: PropTypes.string,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -169,18 +192,23 @@ const mapStateToProps = createStructuredSelector({
   deleteError: makeSelectDeleteError(),
   completeLoading: makeSelectCompleteLoading(),
   completeError: makeSelectCompleteError(),
+  editingTodo: makeSelectEditingTodo(),
+  editLoading: makeSelectEditLoading(),
 });
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    fetchTodos: () => dispatch(loadTodosRequest()),
-    fetchAdd: (todo) => dispatch(addTodoRequest(todo)),
-    fetchDelete: (_id) => dispatch(deleteTodoRequest(_id)),
-    fetchComplete: (_id) => dispatch(completeTodoRequest(_id)),
-  };
-};
+const mapDispatchToProps = dispatch => ({
+  fetchTodos: () => dispatch(loadTodosRequest()),
+  fetchAdd: todo => dispatch(addTodoRequest(todo)),
+  fetchDelete: id => dispatch(deleteTodoRequest(id)),
+  fetchComplete: id => dispatch(completeTodoRequest(id)),
+  // select Todo
+  fetchSelect: id => dispatch(selectTodo(id)),
+  fetchUnselect: () => dispatch(unselectTodo()),
+  // edit Todo
+  fetchEdit: (id, todo) => dispatch(editTodoRequest(id, todo)),
+});
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(TodoPage);
