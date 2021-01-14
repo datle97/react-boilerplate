@@ -72,7 +72,7 @@ export function* getDelete(action) {
 }
 
 export function* getComplete(action) {
-  // select todo from Store by id
+  // select todo by id from Store
   const todo = yield select(makeSelectTodoById(action));
   try {
     const response = yield call(

@@ -1,12 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import {
-  AppBar,
-  CircularProgress,
-  TextField,
-  Toolbar,
-  Typography,
-} from '@material-ui/core';
-import styled from 'styled-components';
+import React, { useEffect } from 'react';
+import { AppBar, CircularProgress, Typography } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { useInjectReducer } from 'utils/injectReducer';
 import { useInjectSaga } from 'utils/injectSaga';
@@ -26,6 +19,7 @@ import {
   makeSelectCompleteError,
   makeSelectEditingTodo,
   makeSelectEditLoading,
+  makeSelectEditError,
 } from './selectors';
 import TodoItem from './TodoItem';
 import {
@@ -37,36 +31,12 @@ import {
   selectTodo,
   unselectTodo,
 } from './actions';
-
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-const App = styled.div`
-  width: auto;
-  text-align: center;
-  background-color: #f5f5f5;
-  .toolbar {
-    min-width: 400px;
-    padding: 24px 0;
-    justify-content: center;
-  }
-  .form {
-    margin: 24px 0;
-    & > div {
-      margin-left: 16px;
-    }
-  }
-  .circularProgress {
-    display: flex;
-    justify-content: center;
-    padding-bottom: 24px;
-  }
-  .error {
-    margin: 16px 0;
-  }
-`;
+import EditingTodo from './EditingTodo';
+import TodoListWrapper from './components/TodoListWrapper';
+import AppWrapper from './components/AppWrapper';
+import StyledToolbar from './components/StyledToolbar';
+import ErrorTypography from './components/ErrorTypography';
+import AddTodo from './AddTodo';
 
 const key = 'todos';
 const TodoPage = ({
@@ -88,78 +58,90 @@ const TodoPage = ({
   editingTodo,
   fetchEdit,
   editLoading,
+  editError,
 }) => {
   // ??????????????????????????????????????????????????????????????????????????????????????
   useInjectReducer({ key, reducer });
   useInjectSaga({ key, saga });
-  const [value, setValue] = useState('');
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
-  const handleChange = event => {
-    setValue(event.target.value);
-  };
-  const handleSubmit = event => {
-    event.preventDefault();
-    fetchAdd(value);
-    setValue('');
-  };
-
   return (
-    <Wrapper>
-      <App>
+    <TodoListWrapper>
+      <AppWrapper>
         <AppBar position="static" variant="elevation">
-          <Toolbar className="toolbar">
+          <StyledToolbar>
             <Typography variant="h5">
               React Todo List ({todoList.length})
             </Typography>
-          </Toolbar>
+          </StyledToolbar>
         </AppBar>
-        <form className="form" onSubmit={handleSubmit}>
-          <TextField
-            variant="outlined"
-            placeholder="Add Task"
-            size="small"
-            value={value}
-            onChange={handleChange}
-          />
-          {addLoading && <CircularProgress />}
-        </form>
+        <AddTodo addLoading={addLoading} fetchAdd={fetchAdd} />
         {loading ? (
-          <div className="circularProgress">
-            <CircularProgress />
-          </div>
+          <CircularProgress />
         ) : (
-          todoList.map(todo => (
-            <TodoItem
-              key={todo._id}
-              id={todo._id}
-              completed={todo.completed}
-              description={todo.description}
-              handleDelete={fetchDelete}
-              deleteLoading={deleteLoading}
-              handleComplete={fetchComplete}
-              completeLoading={completeLoading}
-              // handleSelect => toggle
-              handleSelect={fetchSelect}
-              handleUnselect={fetchUnselect}
-              editingTodo={editingTodo}
-              handleEdit={fetchEdit}
-              editLoading={editLoading}
-            />
-          ))
+          todoList.map(todo =>
+            editingTodo !== todo._id ? (
+              <TodoItem
+                key={todo._id}
+                id={todo._id}
+                completed={todo.completed}
+                description={todo.description}
+                handleDelete={fetchDelete}
+                deleteLoading={deleteLoading}
+                handleComplete={fetchComplete}
+                completeLoading={completeLoading}
+                handleSelect={fetchSelect}
+              />
+            ) : (
+              <EditingTodo
+                key={todo._id}
+                id={todo._id}
+                handleEdit={fetchEdit}
+                editLoading={editLoading}
+                handleUnselect={fetchUnselect}
+                description={todo.description}
+              />
+            ),
+          )
         )}
-        {(error || addError || deleteError || completeError) && (
-          <Typography className="error" color="error">
+        {(error || addError || deleteError || completeError || editError) && (
+          <ErrorTypography color="error">
             An error occurred, please try again later.
-          </Typography>
+          </ErrorTypography>
         )}
-      </App>
-    </Wrapper>
+      </AppWrapper>
+    </TodoListWrapper>
   );
 };
+
+const mapStateToProps = createStructuredSelector({
+  todoList: makeSelectTodoList(),
+  loading: makeSelectLoading(),
+  error: makeSelectError(),
+  addLoading: makeSelectAddLoading(),
+  addError: makeSelectAddError(),
+  deleteLoading: makeSelectDeleteLoading(),
+  deleteError: makeSelectDeleteError(),
+  completeLoading: makeSelectCompleteLoading(),
+  completeError: makeSelectCompleteError(),
+  editingTodo: makeSelectEditingTodo(),
+  editLoading: makeSelectEditLoading(),
+  editError: makeSelectEditError(),
+});
+
+const mapDispatchToProps = dispatch => ({
+  fetchTodos: () => dispatch(loadTodosRequest()),
+  fetchAdd: todo => dispatch(addTodoRequest(todo)),
+  fetchDelete: id => dispatch(deleteTodoRequest(id)),
+  fetchComplete: id => dispatch(completeTodoRequest(id)),
+  fetchEdit: (id, todo) => dispatch(editTodoRequest(id, todo)),
+  // select Todo
+  fetchSelect: id => dispatch(selectTodo(id)),
+  fetchUnselect: () => dispatch(unselectTodo()),
+});
 
 TodoPage.propTypes = {
   todoList: PropTypes.array,
@@ -180,33 +162,8 @@ TodoPage.propTypes = {
   completeError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
   editingTodo: PropTypes.string,
   editLoading: PropTypes.string,
+  editError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
 };
-
-const mapStateToProps = createStructuredSelector({
-  todoList: makeSelectTodoList(),
-  loading: makeSelectLoading(),
-  error: makeSelectError(),
-  addLoading: makeSelectAddLoading(),
-  addError: makeSelectAddError(),
-  deleteLoading: makeSelectDeleteLoading(),
-  deleteError: makeSelectDeleteError(),
-  completeLoading: makeSelectCompleteLoading(),
-  completeError: makeSelectCompleteError(),
-  editingTodo: makeSelectEditingTodo(),
-  editLoading: makeSelectEditLoading(),
-});
-
-const mapDispatchToProps = dispatch => ({
-  fetchTodos: () => dispatch(loadTodosRequest()),
-  fetchAdd: todo => dispatch(addTodoRequest(todo)),
-  fetchDelete: id => dispatch(deleteTodoRequest(id)),
-  fetchComplete: id => dispatch(completeTodoRequest(id)),
-  // select Todo
-  fetchSelect: id => dispatch(selectTodo(id)),
-  fetchUnselect: () => dispatch(unselectTodo()),
-  // edit Todo
-  fetchEdit: (id, todo) => dispatch(editTodoRequest(id, todo)),
-});
 
 export default connect(
   mapStateToProps,

@@ -3,18 +3,7 @@ import { initialState } from './reducer';
 
 const selectTodos = state => state.todos || initialState;
 
-const makeSelectTodoById = state =>
-  createSelector(
-    selectTodos,
-    todosState => {
-      const index = todosState.todoList.findIndex(
-        todo => todo._id === state.id,
-      );
-      return todosState.todoList[index];
-    },
-  );
-
-//
+// SELECT TODOLIST
 const makeSelectLoading = () =>
   createSelector(
     selectTodos,
@@ -33,7 +22,7 @@ const makeSelectError = () =>
     todosState => todosState.error,
   );
 
-// ////////////////////////////////
+// SELECT ADD TODO
 const makeSelectAddLoading = () =>
   createSelector(
     selectTodos,
@@ -45,6 +34,7 @@ const makeSelectAddError = () =>
     todosState => todosState.addError,
   );
 
+// SELECT DELETE TODO
 const makeSelectDeleteLoading = () =>
   createSelector(
     selectTodos,
@@ -56,6 +46,7 @@ const makeSelectDeleteError = () =>
     todosState => todosState.deleteError,
   );
 
+// SELECT COMPLETE TODO
 const makeSelectCompleteLoading = () =>
   createSelector(
     selectTodos,
@@ -67,17 +58,37 @@ const makeSelectCompleteError = () =>
     todosState => todosState.completeError,
   );
 
+// SELECT EDITING TODO
 const makeSelectEditingTodo = () =>
   createSelector(
     selectTodos,
     todosState => todosState.editingTodo,
   );
 
+// SELECT EDIT TODO
 const makeSelectEditLoading = () =>
   createSelector(
     selectTodos,
     todosState => todosState.editLoading,
   );
+const makeSelectEditError = () =>
+  createSelector(
+    selectTodos,
+    todosState => todosState.editError,
+  );
+
+// SELECT TODO BY ID
+const makeSelectTodoById = state =>
+  createSelector(
+    selectTodos,
+    todosState => {
+      const index = todosState.todoList.findIndex(
+        todo => todo._id === state.id,
+      );
+      return todosState.todoList[index];
+    },
+  );
+
 export {
   makeSelectLoading,
   makeSelectTodoList,
@@ -91,4 +102,5 @@ export {
   makeSelectTodoById,
   makeSelectEditingTodo,
   makeSelectEditLoading,
+  makeSelectEditError,
 };

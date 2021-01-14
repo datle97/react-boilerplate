@@ -29,11 +29,10 @@ export const initialState = {
   deleteError: false,
   completeLoading: null,
   completeError: false,
-  // is Editing
-  editingTodo: null,
-  //
   editLoading: null,
   editError: false,
+  // is Editing
+  editingTodo: null,
 };
 
 /* eslint-disable default-case, no-param-reassign */
