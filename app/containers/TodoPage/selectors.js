@@ -4,103 +4,71 @@ import { initialState } from './reducer';
 const selectTodos = state => state.todos || initialState;
 
 // SELECT TODOLIST
-const makeSelectLoading = () =>
-  createSelector(
-    selectTodos,
-    todosState => todosState.loading,
-  );
-
 const makeSelectTodoList = () =>
   createSelector(
     selectTodos,
     todosState => todosState.todoList,
   );
 
-const makeSelectError = () =>
+// SELECT GET TODOS
+const makeSelectGetTodos = () =>
   createSelector(
     selectTodos,
-    todosState => todosState.error,
+    todosState => todosState.getTodos,
   );
 
 // SELECT ADD TODO
-const makeSelectAddLoading = () =>
+const makeSelectAddTodo = () =>
   createSelector(
     selectTodos,
-    todosState => todosState.addLoading,
-  );
-const makeSelectAddError = () =>
-  createSelector(
-    selectTodos,
-    todosState => todosState.addError,
+    todosState => todosState.addTodo,
   );
 
 // SELECT DELETE TODO
-const makeSelectDeleteLoading = () =>
+const makeSelectDeleteTodo = () =>
   createSelector(
     selectTodos,
-    todosState => todosState.deleteLoading,
-  );
-const makeSelectDeleteError = () =>
-  createSelector(
-    selectTodos,
-    todosState => todosState.deleteError,
+    todosState => todosState.deleteTodo,
   );
 
-// SELECT COMPLETE TODO
-const makeSelectCompleteLoading = () =>
+// SELECT COMPLETED TODO
+const makeSelectCompletedTodo = () =>
   createSelector(
     selectTodos,
-    todosState => todosState.completeLoading,
-  );
-const makeSelectCompleteError = () =>
-  createSelector(
-    selectTodos,
-    todosState => todosState.completeError,
+    todosState => todosState.completedTodo,
   );
 
-// SELECT EDITING TODO
-const makeSelectEditingTodo = () =>
+// SELECT ACTIVE TODO
+const makeSelectIsActive = () =>
   createSelector(
     selectTodos,
-    todosState => todosState.editingTodo,
+    todosState => todosState.isActive,
   );
 
 // SELECT EDIT TODO
-const makeSelectEditLoading = () =>
+const makeSelectEditTodo = () =>
   createSelector(
     selectTodos,
-    todosState => todosState.editLoading,
-  );
-const makeSelectEditError = () =>
-  createSelector(
-    selectTodos,
-    todosState => todosState.editError,
+    todosState => todosState.editTodo,
   );
 
 // SELECT TODO BY ID
-const makeSelectTodoById = state =>
+const makeSelectTodoById = id =>
   createSelector(
     selectTodos,
     todosState => {
-      const index = todosState.todoList.findIndex(
-        todo => todo._id === state.id,
-      );
+      const index = todosState.todoList.findIndex(todo => todo._id === id);
       return todosState.todoList[index];
     },
   );
 
 export {
-  makeSelectLoading,
   makeSelectTodoList,
-  makeSelectError,
-  makeSelectDeleteLoading,
-  makeSelectAddLoading,
-  makeSelectAddError,
-  makeSelectDeleteError,
-  makeSelectCompleteLoading,
-  makeSelectCompleteError,
+  makeSelectGetTodos,
+  makeSelectAddTodo,
+  makeSelectDeleteTodo,
+  makeSelectCompletedTodo,
   makeSelectTodoById,
-  makeSelectEditingTodo,
-  makeSelectEditLoading,
-  makeSelectEditError,
+  makeSelectIsActive,
+  makeSelectEditTodo,
 };

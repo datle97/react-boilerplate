@@ -1,110 +1,77 @@
 import {
-  LOAD_TODOS_REQUEST,
-  LOAD_TODOS_SUCCESS,
-  LOAD_TODOS_ERROR,
+  GET_TODOS_REQUEST,
+  GET_TODOS_DONE,
   ADD_TODO_REQUEST,
-  ADD_TODO_SUCCESS,
-  ADD_TODO_ERROR,
   DELETE_TODO_REQUEST,
-  DELETE_TODO_SUCCESS,
-  DELETE_TODO_ERROR,
-  COMPLETE_TODO_REQUEST,
-  COMPLETE_TODO_SUCCESS,
-  COMPLETE_TODO_ERROR,
+  DELETE_TODO_DONE,
+  COMPLETED_TODO_REQUEST,
+  COMPLETED_TODO_DONE,
   EDIT_TODO_REQUEST,
-  EDIT_TODO_SUCCESS,
-  EDIT_TODO_ERROR,
   SELECT_TODO,
   UNSELECT_TODO,
+  ADD_TODO_DONE,
+  EDIT_TODO_DONE,
 } from './constants';
 
 // TODO LIST
 export const loadTodosRequest = () => ({
-  type: LOAD_TODOS_REQUEST,
+  type: GET_TODOS_REQUEST,
 });
 
-export const loadTodosSuccess = todoList => ({
-  type: LOAD_TODOS_SUCCESS,
-  todoList,
-});
-
-export const loadTodosError = error => ({
-  type: LOAD_TODOS_ERROR,
-  error,
+export const loadTodosDone = payload => ({
+  type: GET_TODOS_DONE,
+  payload,
 });
 
 // ADD TODO
 // (todo)???
-export const addTodoRequest = todo => ({
+export const addTodoRequest = payload => ({
   type: ADD_TODO_REQUEST,
-  todo,
+  payload,
 });
-
-export const addTodoSuccess = todo => ({
-  type: ADD_TODO_SUCCESS,
-  todo,
-});
-
-export const addTodoError = addError => ({
-  type: ADD_TODO_ERROR,
-  addError,
+export const addTodoDone = payload => ({
+  type: ADD_TODO_DONE,
+  payload,
 });
 
 // DELETE TODO
-export const deleteTodoRequest = id => ({
+export const deleteTodoRequest = payload => ({
   type: DELETE_TODO_REQUEST,
-  id,
+  payload,
 });
 
-export const deleteTodoSuccess = id => ({
-  type: DELETE_TODO_SUCCESS,
-  id,
+export const deleteTodoDone = payload => ({
+  type: DELETE_TODO_DONE,
+  payload,
 });
 
-export const deleteTodoError = deleteError => ({
-  type: DELETE_TODO_ERROR,
-  deleteError,
+// COMPLETED TODO
+export const completedTodoRequest = payload => ({
+  type: COMPLETED_TODO_REQUEST,
+  payload,
 });
 
-// COMPLETE TODO
-export const completeTodoRequest = id => ({
-  type: COMPLETE_TODO_REQUEST,
-  id,
-});
-
-export const completeTodoSuccess = id => ({
-  type: COMPLETE_TODO_SUCCESS,
-  id,
-});
-
-export const completeTodoError = completeError => ({
-  type: COMPLETE_TODO_ERROR,
-  completeError,
+export const completedTodoDone = payload => ({
+  type: COMPLETED_TODO_DONE,
+  payload,
 });
 
 // SELECT UNSELECT TODO
-export const selectTodo = id => ({
+export const selectTodo = payload => ({
   type: SELECT_TODO,
-  id,
+  payload,
 });
 export const unselectTodo = () => ({
   type: UNSELECT_TODO,
 });
 
 // EDIT TODO
-export const editTodoRequest = (id, todo) => ({
+export const editTodoRequest = payload => ({
   type: EDIT_TODO_REQUEST,
-  id,
-  todo,
+  payload,
 });
 
-export const editTodoSuccess = (id, todo) => ({
-  type: EDIT_TODO_SUCCESS,
-  id,
-  todo,
-});
-
-export const editTodoError = error => ({
-  type: EDIT_TODO_ERROR,
-  error,
+export const editTodoDone = payload => ({
+  type: EDIT_TODO_DONE,
+  payload,
 });

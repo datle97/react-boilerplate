@@ -17,20 +17,20 @@ const TodoItem = ({
   description,
   handleDelete,
   deleteLoading,
-  handleComplete,
-  completeLoading,
+  handleCompleted,
+  completedLoading,
   handleSelect,
 }) => (
   <TodoWrapper>
     <IconWrapper>
-      <IconButton onClick={() => handleComplete(id)}>
+      <IconButton onClick={() => handleCompleted(id)}>
         {!completed ? (
           <CropFreeOutlinedIcon color="primary" />
         ) : (
           <LibraryAddCheckIcon color="primary" />
         )}
       </IconButton>
-      {completeLoading === id && <CompleteCircularProgress size={48} />}
+      {completedLoading === id && <CompleteCircularProgress size={48} />}
     </IconWrapper>
     <Typography>{description}</Typography>
     <StyledIconButton size="small" onClick={() => handleSelect(id)}>
@@ -51,8 +51,8 @@ TodoItem.propTypes = {
   description: PropTypes.string,
   handleDelete: PropTypes.func,
   deleteLoading: PropTypes.string,
-  handleComplete: PropTypes.func,
-  completeLoading: PropTypes.string,
+  handleCompleted: PropTypes.func,
+  completedLoading: PropTypes.string,
   handleSelect: PropTypes.func,
 };
 

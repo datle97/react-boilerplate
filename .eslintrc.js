@@ -36,7 +36,6 @@ module.exports = {
     'import/prefer-default-export': 0,
     // tu them
     'no-underscore-dangle': 'off',
-    //
     indent: [
       2,
       2,

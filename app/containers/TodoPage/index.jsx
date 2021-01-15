@@ -8,23 +8,18 @@ import PropTypes from 'prop-types';
 import saga from './saga';
 import reducer from './reducer';
 import {
-  makeSelectLoading,
   makeSelectTodoList,
-  makeSelectError,
-  makeSelectDeleteLoading,
-  makeSelectAddLoading,
-  makeSelectAddError,
-  makeSelectDeleteError,
-  makeSelectCompleteLoading,
-  makeSelectCompleteError,
-  makeSelectEditingTodo,
-  makeSelectEditLoading,
-  makeSelectEditError,
+  makeSelectDeleteTodo,
+  makeSelectIsActive,
+  makeSelectGetTodos,
+  makeSelectAddTodo,
+  makeSelectCompletedTodo,
+  makeSelectEditTodo,
 } from './selectors';
 import TodoItem from './TodoItem';
 import {
   addTodoRequest,
-  completeTodoRequest,
+  completedTodoRequest,
   deleteTodoRequest,
   editTodoRequest,
   loadTodosRequest,
@@ -40,34 +35,27 @@ import AddTodo from './AddTodo';
 
 const key = 'todos';
 const TodoPage = ({
-  loading,
   todoList,
-  error,
+  getTodos,
   fetchTodos,
   fetchDelete,
   fetchAdd,
-  deleteLoading,
-  addLoading,
-  addError,
-  deleteError,
-  completeLoading,
-  completeError,
-  fetchComplete,
+  addTodo,
+  deleteTodo,
+  completedTodo,
+  fetchCompleted,
   fetchSelect,
   fetchUnselect,
-  editingTodo,
+  isActive,
   fetchEdit,
-  editLoading,
-  editError,
+  editTodo,
 }) => {
-  // ??????????????????????????????????????????????????????????????????????????????????????
   useInjectReducer({ key, reducer });
   useInjectSaga({ key, saga });
 
   useEffect(() => {
     fetchTodos();
   }, []);
-
   return (
     <TodoListWrapper>
       <AppWrapper>
@@ -78,21 +66,21 @@ const TodoPage = ({
             </Typography>
           </StyledToolbar>
         </AppBar>
-        <AddTodo addLoading={addLoading} fetchAdd={fetchAdd} />
-        {loading ? (
+        <AddTodo addLoading={addTodo.isLoading} fetchAdd={fetchAdd} />
+        {getTodos.isLoading ? (
           <CircularProgress />
         ) : (
           todoList.map(todo =>
-            editingTodo !== todo._id ? (
+            isActive !== todo._id ? (
               <TodoItem
                 key={todo._id}
                 id={todo._id}
                 completed={todo.completed}
                 description={todo.description}
                 handleDelete={fetchDelete}
-                deleteLoading={deleteLoading}
-                handleComplete={fetchComplete}
-                completeLoading={completeLoading}
+                deleteLoading={deleteTodo.isLoading}
+                handleCompleted={fetchCompleted}
+                completedLoading={completedTodo.isLoading}
                 handleSelect={fetchSelect}
               />
             ) : (
@@ -100,14 +88,18 @@ const TodoPage = ({
                 key={todo._id}
                 id={todo._id}
                 handleEdit={fetchEdit}
-                editLoading={editLoading}
+                editLoading={editTodo.isLoading}
                 handleUnselect={fetchUnselect}
                 description={todo.description}
               />
             ),
           )
         )}
-        {(error || addError || deleteError || completeError || editError) && (
+        {(getTodos.error ||
+          addTodo.error ||
+          deleteTodo.error ||
+          completedTodo.error ||
+          editTodo.error) && (
           <ErrorTypography color="error">
             An error occurred, please try again later.
           </ErrorTypography>
@@ -119,50 +111,40 @@ const TodoPage = ({
 
 const mapStateToProps = createStructuredSelector({
   todoList: makeSelectTodoList(),
-  loading: makeSelectLoading(),
-  error: makeSelectError(),
-  addLoading: makeSelectAddLoading(),
-  addError: makeSelectAddError(),
-  deleteLoading: makeSelectDeleteLoading(),
-  deleteError: makeSelectDeleteError(),
-  completeLoading: makeSelectCompleteLoading(),
-  completeError: makeSelectCompleteError(),
-  editingTodo: makeSelectEditingTodo(),
-  editLoading: makeSelectEditLoading(),
-  editError: makeSelectEditError(),
+  getTodos: makeSelectGetTodos(),
+  addTodo: makeSelectAddTodo(),
+  deleteTodo: makeSelectDeleteTodo(),
+  completedTodo: makeSelectCompletedTodo(),
+  isActive: makeSelectIsActive(),
+  editTodo: makeSelectEditTodo(),
 });
 
 const mapDispatchToProps = dispatch => ({
   fetchTodos: () => dispatch(loadTodosRequest()),
-  fetchAdd: todo => dispatch(addTodoRequest(todo)),
-  fetchDelete: id => dispatch(deleteTodoRequest(id)),
-  fetchComplete: id => dispatch(completeTodoRequest(id)),
-  fetchEdit: (id, todo) => dispatch(editTodoRequest(id, todo)),
+  fetchAdd: todo => dispatch(addTodoRequest({ todo })),
+  fetchDelete: id => dispatch(deleteTodoRequest({ id })),
+  fetchCompleted: id => dispatch(completedTodoRequest({ id })),
+  fetchEdit: (id, todo) => dispatch(editTodoRequest({ id, todo })),
   // select Todo
-  fetchSelect: id => dispatch(selectTodo(id)),
+  fetchSelect: id => dispatch(selectTodo({ id })),
   fetchUnselect: () => dispatch(unselectTodo()),
 });
 
 TodoPage.propTypes = {
   todoList: PropTypes.array,
-  loading: PropTypes.bool,
-  error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  getTodos: PropTypes.object,
   fetchTodos: PropTypes.func,
   fetchAdd: PropTypes.func,
   fetchDelete: PropTypes.func,
-  fetchComplete: PropTypes.func,
+  fetchCompleted: PropTypes.func,
   fetchSelect: PropTypes.func,
   fetchUnselect: PropTypes.func,
   fetchEdit: PropTypes.func,
-  addLoading: PropTypes.bool,
-  addError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
-  deleteLoading: PropTypes.string,
-  deleteError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
-  completeLoading: PropTypes.string,
-  completeError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
-  editingTodo: PropTypes.string,
-  editLoading: PropTypes.string,
-  editError: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  addTodo: PropTypes.object,
+  deleteTodo: PropTypes.object,
+  completedTodo: PropTypes.object,
+  editTodo: PropTypes.object,
+  isActive: PropTypes.string,
 };
 
 export default connect(

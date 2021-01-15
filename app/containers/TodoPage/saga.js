@@ -1,114 +1,94 @@
-import axios from 'axios';
 import { all, call, put, select, takeEvery } from 'redux-saga/effects';
+import axiosRequest from '../../utils/axiosRequest';
 import {
-  addTodoError,
-  addTodoSuccess,
-  completeTodoError,
-  completeTodoSuccess,
-  deleteTodoError,
-  deleteTodoSuccess,
-  editTodoError,
-  editTodoSuccess,
-  loadTodosError,
-  loadTodosSuccess,
+  addTodoDone,
+  completedTodoDone,
+  deleteTodoDone,
+  editTodoDone,
+  loadTodosDone,
 } from './actions';
 import {
   ADD_TODO_REQUEST,
-  COMPLETE_TODO_REQUEST,
+  COMPLETED_TODO_REQUEST,
   DELETE_TODO_REQUEST,
   EDIT_TODO_REQUEST,
-  LOAD_TODOS_REQUEST,
+  GET_TODOS_REQUEST,
 } from './constants';
 import { makeSelectTodoById } from './selectors';
 
-const url = `https://api-nodejs-todolist.herokuapp.com/task`;
-const authHeaders = {
-  headers: {
-    Authorization:
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1Zjc2ZTQzN2E2YTY3MzAwMTc0NzFjNmIiLCJpYXQiOjE2MDE2MjcxOTJ9.x6hiHZB6izKaoLB5RRKKeqX-J5TlqtFJMDu2NVtl5ak',
-  },
-};
-
 export function* getTodos() {
-  // const todos = yield select(makeSelectTodoList());
   try {
-    const response = yield call(axios.get, url, authHeaders);
+    const response = yield call(axiosRequest, 'get');
     const { data } = response.data;
-    yield put(loadTodosSuccess(data));
-  } catch (err) {
-    yield put(loadTodosError(err));
+    yield put(loadTodosDone({ status: true, data }));
+  } catch (error) {
+    yield put(loadTodosDone({ status: false, error }));
   }
 }
 
 export function* getAdd(action) {
   try {
-    const response = yield call(
-      axios.post,
-      url,
-      { description: action.todo },
-      authHeaders,
-    );
+    const response = yield call(axiosRequest, 'post', {
+      data: { description: action.payload.todo },
+    });
     const { data } = response.data;
-    yield put(addTodoSuccess(data));
-  } catch (err) {
-    yield put(addTodoError(err));
+    yield put(addTodoDone({ status: true, data }));
+  } catch (error) {
+    yield put(addTodoDone({ status: false, error }));
   }
 }
 
 export function* getDelete(action) {
+  const { id } = action.payload;
   try {
-    const response = yield call(
-      axios.delete,
-      `${url}/${action.id}`,
-      authHeaders,
-    );
+    const response = yield call(axiosRequest, 'delete', { url: id });
     const { success } = response.data;
     if (success) {
-      yield put(deleteTodoSuccess(action.id));
+      yield put(deleteTodoDone({ status: true, id }));
     }
-  } catch (err) {
-    yield put(deleteTodoError(err));
+  } catch (error) {
+    yield put(deleteTodoDone({ status: false, error }));
   }
 }
 
-export function* getComplete(action) {
+export function* getCompleted(action) {
+  const { id } = action.payload;
   // select todo by id from Store
-  const todo = yield select(makeSelectTodoById(action));
+  const todo = yield select(makeSelectTodoById(id));
   try {
-    const response = yield call(
-      axios.put,
-      `${url}/${action.id}`,
-      { completed: !todo.complete },
-      authHeaders,
-    );
+    const response = yield call(axiosRequest, 'put', {
+      url: id,
+      data: { completed: !todo.completed },
+    });
     const { data } = response.data;
-    yield put(completeTodoSuccess(data._id));
-  } catch (err) {
-    yield put(completeTodoError(err));
+    yield put(completedTodoDone({ status: true, id, data: data.completed }));
+  } catch (error) {
+    yield put(completedTodoDone({ status: false, error }));
   }
 }
 
 export function* getEdit(action) {
+  const { id, todo } = action.payload;
   try {
-    const response = yield call(
-      axios.put,
-      `${url}/${action.id}`,
-      { description: action.todo },
-      authHeaders,
-    );
+    const response = yield call(axiosRequest, 'put', {
+      url: id,
+      data: { description: todo },
+    });
     const { data } = response.data;
-    yield put(editTodoSuccess(data._id, data.description));
-  } catch (err) {
-    yield put(editTodoError(err));
+    yield put(
+      editTodoDone({ status: true, id: data._id, data: data.description }),
+    );
+  } catch (error) {
+    yield put(editTodoDone({ status: false, error }));
   }
 }
 
 export default function* todosData() {
   yield all([
-    takeEvery(LOAD_TODOS_REQUEST, getTodos),
+    takeEvery(GET_TODOS_REQUEST, getTodos),
     takeEvery(ADD_TODO_REQUEST, getAdd),
     takeEvery(DELETE_TODO_REQUEST, getDelete),
-    takeEvery(COMPLETE_TODO_REQUEST, getComplete),
+    takeEvery(COMPLETED_TODO_REQUEST, getCompleted),
     takeEvery(EDIT_TODO_REQUEST, getEdit),
   ]);
 }
