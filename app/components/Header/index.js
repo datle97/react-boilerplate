@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
@@ -23,6 +24,9 @@ function Header() {
         </HeaderLink>
         <HeaderLink to="/todolist">
           <FormattedMessage {...messages.todolist} />
+        </HeaderLink>
+        <HeaderLink to="/immertodolist">
+          <FormattedMessage {...messages.immertodolist} />
         </HeaderLink>
       </NavBar>
     </div>

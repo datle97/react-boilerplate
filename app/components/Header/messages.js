@@ -20,4 +20,8 @@ export default defineMessages({
     id: `${scope}.todolist`,
     defaultMessage: 'Todolist',
   },
+  immertodolist: {
+    id: `${scope}.immertodolist`,
+    defaultMessage: 'Immer Todolist',
+  },
 });

@@ -22,7 +22,6 @@ export const loadTodosDone = payload => ({
   type: GET_TODOS_DONE,
   payload,
 });
-
 // ADD TODO
 // (todo)???
 export const addTodoRequest = payload => ({

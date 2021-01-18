@@ -19,6 +19,7 @@ import Footer from 'components/Footer';
 
 import GlobalStyle from '../../global-styles';
 import TodoPage from '../TodoPage';
+import ImmerTodoPage from '../ImmerTodoPage';
 
 const AppWrapper = styled.div`
   max-width: calc(768px + 16px * 2);
@@ -43,6 +44,7 @@ export default function App() {
         <Route exact path="/" component={HomePage} />
         <Route path="/features" component={FeaturePage} />
         <Route path="/todolist" component={TodoPage} />
+        <Route path="/immertodolist" component={ImmerTodoPage} />
         <Route path="" component={NotFoundPage} />
       </Switch>
       <Footer />
