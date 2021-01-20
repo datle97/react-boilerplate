@@ -3,24 +3,26 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Form from './components/Form';
 
-const AddTodo = ({ addLoading, fetchAdd }) => {
-  const [newTodo, setNewTodo] = useState('');
+const AddTodo = ({ addLoading, handleAdd }) => {
+  const [value, setValue] = useState('');
+
   const handleChange = event => {
-    setNewTodo(event.target.value);
+    setValue(event.target.value);
   };
-  const handleAdd = event => {
+
+  const handleSubmit = event => {
     event.preventDefault();
-    fetchAdd(newTodo);
-    setNewTodo('');
+    handleAdd(value);
+    setValue('');
   };
 
   return (
-    <Form onSubmit={handleAdd}>
+    <Form onSubmit={handleSubmit}>
       <TextField
         variant="outlined"
         placeholder="Add Task"
         size="small"
-        value={newTodo}
+        value={value}
         onChange={handleChange}
       />
       {addLoading && <CircularProgress />}
@@ -30,7 +32,7 @@ const AddTodo = ({ addLoading, fetchAdd }) => {
 
 AddTodo.propTypes = {
   addLoading: PropTypes.bool,
-  fetchAdd: PropTypes.func,
+  handleAdd: PropTypes.func,
 };
 
 export default AddTodo;

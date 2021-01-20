@@ -16,15 +16,15 @@ const EditingTodo = ({
   handleUnselect,
   description,
 }) => {
-  const [selectValue, setSelectValue] = useState(description);
+  const [value, setValue] = useState(description);
 
   const handleSelectValue = event => {
-    setSelectValue(event.target.value);
+    setValue(event.target.value);
   };
   return (
     <TodoWrapper>
       <StyledInputBase
-        value={selectValue}
+        value={value}
         onChange={handleSelectValue}
         autoFocus
         onFocus={event => {
@@ -33,10 +33,7 @@ const EditingTodo = ({
         fullWidth
       />
       <IconWrapper>
-        <StyledIconButton
-          size="small"
-          onClick={() => handleEdit(id, selectValue)}
-        >
+        <StyledIconButton size="small" onClick={() => handleEdit(id, value)}>
           <CheckIcon />
         </StyledIconButton>
         {editLoading === id && <StyledCircularProgress size={30} />}

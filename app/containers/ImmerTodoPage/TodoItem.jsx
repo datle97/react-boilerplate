@@ -23,7 +23,7 @@ const TodoItem = ({
 }) => (
   <TodoWrapper>
     <IconWrapper>
-      <IconButton onClick={() => handleCompleted(id)}>
+      <IconButton onClick={() => handleCompleted(id, completed)}>
         {!completed ? (
           <CropFreeOutlinedIcon color="primary" />
         ) : (

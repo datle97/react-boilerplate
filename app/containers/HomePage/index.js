@@ -33,9 +33,10 @@ import { changeUsername } from './actions';
 import { makeSelectUsername } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
+import ImmerTodoPage from '../ImmerTodoPage';
+import TodoPage from '../TodoPage';
 
 const key = 'home';
-
 export function HomePage({
   username,
   loading,
@@ -46,7 +47,6 @@ export function HomePage({
 }) {
   useInjectReducer({ key, reducer });
   useInjectSaga({ key, saga });
-
   useEffect(() => {
     // When initial state username is not null, submit the form to load repos
     if (username && username.trim().length > 0) onSubmitForm();
@@ -68,6 +68,8 @@ export function HomePage({
         />
       </Helmet>
       <div>
+        <ImmerTodoPage />
+        <TodoPage />
         <CenteredSection>
           <H2>
             <FormattedMessage {...messages.startProjectHeader} />

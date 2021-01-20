@@ -1,52 +1,52 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
-// import { useEffect } from 'react';
+import { useState } from 'react';
 import { useImmer } from 'use-immer';
 
-// const initialState = {
-//   isLoading: false,
-//   data: [],
-//   error: false,
-// };
-
-const useAdd = (currentData, url, options = {}) => {
-  const [state, setState] = useImmer({
+const useAdd = url => {
+  const [input, setInput] = useState('');
+  const [addTodo, setAddTodo] = useImmer({
     isLoading: false,
-    data: currentData,
     error: false,
   });
-  console.log(state);
 
-  const fetchData = async () => {
+  // eslint-disable-next-line consistent-return
+  const fetchAdd = async () => {
     // loading
-    setState(draft => {
+    setAddTodo(draft => {
       draft.isLoading = true;
+      draft.error = false;
     });
     try {
-      const response = await axios.post(url, {
-        headers: {
-          Authorization:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1Zjc2ZTQzN2E2YTY3MzAwMTc0NzFjNmIiLCJpYXQiOjE2MDE2MjcxOTJ9.x6hiHZB6izKaoLB5RRKKeqX-J5TlqtFJMDu2NVtl5ak',
+      const response = await axios.post(
+        url,
+        { description: input },
+        {
+          headers: {
+            Authorization:
+              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1Zjc2ZTQzN2E2YTY3MzAwMTc0NzFjNmIiLCJpYXQiOjE2MDE2MjcxOTJ9.x6hiHZB6izKaoLB5RRKKeqX-J5TlqtFJMDu2NVtl5ak',
+          },
         },
-        ...options,
-      });
-      console.log(response);
+      );
       // success
-      setState(draft => {
+      setAddTodo(draft => {
         draft.isLoading = false;
-        draft.data.push(response.data.data);
       });
+      return response.data.data;
     } catch (error) {
       // error
-      setState(draft => {
+      setAddTodo(draft => {
         draft.isLoading = false;
         draft.error = error;
       });
     }
   };
-  fetchData();
 
-  // return [state];
+  const handleChange = event => {
+    setInput(event.target.value);
+  };
+
+  return { addTodo, input, setInput, handleChange, fetchAdd };
 };
 
 export default useAdd;
