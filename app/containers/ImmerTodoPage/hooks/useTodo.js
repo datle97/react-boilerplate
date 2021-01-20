@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useImmer } from 'use-immer';
 import axiosRequest from './axiosRequest';
 
@@ -25,29 +25,30 @@ const initialState = {
 const useTodo = url => {
   const [todoList, setTodoList] = useImmer(initialState);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // loading
-      setTodoList(draft => {
-        draft.isLoading.fetchTodo = true;
-        draft.error.fetchTodo = false;
-      });
+  const fetchData = useCallback(async () => {
+    // loading
+    setTodoList(draft => {
+      draft.isLoading.fetchTodo = true;
+      draft.error.fetchTodo = false;
+    });
 
-      try {
-        const { data } = await axiosRequest(url, 'get');
-        // success
-        setTodoList(draft => {
-          draft.isLoading.fetchTodo = false;
-          draft.data = data.data;
-        });
-      } catch (error) {
-        // error
-        setTodoList(draft => {
-          draft.isLoading.fetchTodo = false;
-          draft.error.fetchTodo = error.message;
-        });
-      }
-    };
+    try {
+      const { data } = await axiosRequest(url, 'get');
+      // success
+      setTodoList(draft => {
+        draft.isLoading.fetchTodo = false;
+        draft.data = data.data;
+      });
+    } catch (error) {
+      // error
+      setTodoList(draft => {
+        draft.isLoading.fetchTodo = false;
+        draft.error.fetchTodo = error.message;
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     fetchData();
   }, []);
 
