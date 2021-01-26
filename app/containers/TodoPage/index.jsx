@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { AppBar, CircularProgress, Typography } from '@material-ui/core';
+import { AppBar, Typography } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { useInjectReducer } from 'utils/injectReducer';
 import { useInjectSaga } from 'utils/injectSaga';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
+import ReposList from './ReposList';
 import saga from './saga';
 import reducer from './reducer';
 import {
@@ -16,7 +17,6 @@ import {
   makeSelectCompletedTodo,
   makeSelectEditTodo,
 } from './selectors';
-import TodoItem from './TodoItem';
 import {
   addTodoRequest,
   completedTodoRequest,
@@ -26,7 +26,6 @@ import {
   selectTodo,
   unselectTodo,
 } from './actions';
-import EditingTodo from './EditingTodo';
 import TodoListWrapper from './components/TodoListWrapper';
 import AppWrapper from './components/AppWrapper';
 import StyledToolbar from './components/StyledToolbar';
@@ -56,6 +55,21 @@ const TodoPage = ({
   useEffect(() => {
     fetchTodos();
   }, []);
+
+  const reposListProps = {
+    loading: getTodos.isLoading,
+    error: getTodos.error,
+    repos: todoList,
+    isActive,
+    fetchDelete,
+    deleteTodo,
+    fetchCompleted,
+    completedTodo,
+    fetchSelect,
+    fetchEdit,
+    editTodo,
+    fetchUnselect,
+  };
   return (
     <TodoListWrapper>
       <AppWrapper>
@@ -67,34 +81,8 @@ const TodoPage = ({
           </StyledToolbar>
         </AppBar>
         <AddTodo addLoading={addTodo.isLoading} fetchAdd={fetchAdd} />
-        {getTodos.isLoading ? (
-          <CircularProgress />
-        ) : (
-          todoList.map(todo =>
-            isActive !== todo._id ? (
-              <TodoItem
-                key={todo._id}
-                id={todo._id}
-                completed={todo.completed}
-                description={todo.description}
-                handleDelete={fetchDelete}
-                deleteLoading={deleteTodo.isLoading}
-                handleCompleted={fetchCompleted}
-                completedLoading={completedTodo.isLoading}
-                handleSelect={fetchSelect}
-              />
-            ) : (
-              <EditingTodo
-                key={todo._id}
-                id={todo._id}
-                handleEdit={fetchEdit}
-                editLoading={editTodo.isLoading}
-                handleUnselect={fetchUnselect}
-                description={todo.description}
-              />
-            ),
-          )
-        )}
+
+        <ReposList {...reposListProps} />
         {(getTodos.error ||
           addTodo.error ||
           deleteTodo.error ||

@@ -18,7 +18,7 @@ import Header from 'components/Header';
 import Footer from 'components/Footer';
 
 import GlobalStyle from '../../global-styles';
-import TodoPage from '../TodoPage';
+import TodoPage from '../TodoPage/Loadable';
 import ImmerTodoPage from '../ImmerTodoPage';
 
 const AppWrapper = styled.div`
